@@ -21,13 +21,6 @@ class ClientGUI(QWidget):
         self.setWindowTitle('Video Player')
         self.setObjectName('Video Player')
 
-        self.player = QMediaPlayer()
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile('/home/qiu/Desktop/rtp/task2/server/2.mkv')))
-        self.videowidget = QVideoWidget(self)
-        self.player.setVideoOutput(self.videowidget)
-        self.videowidget.show()
-        self.player.play()
-
         self.speeds  = ['1.0', '0.5', '2.0']
         self.clarity = ['高清', '超清',  '流畅']
 
@@ -83,7 +76,6 @@ class ClientGUI(QWidget):
         self.vlayout = QVBoxLayout()
         self.vlayout.setObjectName('Main Vertical Layout')
         self.vlayout.setSpacing(10)
-        self.vlayout.addWidget(self.videowidget)
         self.vlayout.addLayout(self.phlayout)
         self.vlayout.addLayout(self.shlayout)
         self.vlayout.addLayout(self.chlayout)
@@ -91,6 +83,15 @@ class ClientGUI(QWidget):
         self.setLayout(self.vlayout)
 
         self.show()
+
+    def get_hms(self, time_):
+        """
+        Transform seconds to hour:minute:second format
+        """
+        hours = time_ // 3600
+        mins = (time_ % 3600) // 60
+        secs = time_ % 60
+        return (hours, mins, secs)
 
     @pyqtSlot(str)
     def show_info_dialog(self, msg):
@@ -101,6 +102,11 @@ class ClientGUI(QWidget):
         """Update the movie frame according to temp image file"""
         self.lblvideo.setPixmap(QPixmap(filename))
 
+    @pyqtSlot(int)
+    def update_progress(self, play_time):
+        (hours, mins, secs) = self.get_hms(play_time)
+        self.lblprogress.setText('{:0>2d}:{:0>2d}:{:0>2d}'.format(hours, mins, secs))
+        self.playslider.setValue(self.playslider.value() + 1)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

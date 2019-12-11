@@ -1,10 +1,12 @@
 import cv2
 
-class VideoFrame:
+class VideoStream:
     def __init__(self, filename):
         self.filename = filename
         try:
             self.vidcap = cv2.VideoCapture(filename)
+            self.fps = self.vidcap.get(cv2.CAP_PROP_FPS)
+            self.frm_cnt = self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)
         except Exception as e:
             raise e
         self.pktnum = 0
