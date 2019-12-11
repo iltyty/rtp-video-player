@@ -181,8 +181,6 @@ class Client:
         # Send the RTSP request using rtspSocket.
         self.rtspSocket.send(request.encode())
 
-        print('\nData sent:\n' + request)
-
     def recvRtspReply(self):
         """Receive RTSP reply from the server."""
         while True:
@@ -252,5 +250,5 @@ class Client:
 
 if __name__ == '__main__':
     tk = Tk()
-    Client(tk, 'localhost', 5544, 4321, '2.mp4')
+    Client(tk, 'localhost', 5544, 4321, './imgs')
     tk.mainloop()

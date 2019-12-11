@@ -1,20 +1,25 @@
-import cv2
+import os
+from time import sleep
 
 class VideoFrame:
-    def __init__(self, filename):
-        self.filename = filename
-        try:
-            self.vidcap = cv2.VideoCapture(filename)
-        except Exception as e:
-            raise e
+    def __init__(self, dirname):
         self.pktnum = 0
+        self.index = -1
+        self.files = os.listdir(dirname)
+        self.dirname = dirname
+        self.files = sorted(self.files, key=lambda x: int(x.split('.')[0]))
 
     # Get the next rtp packet
     def next_pkt(self):
-        success, data = self.vidcap.read()
-        if success:
-            self.pktnum += 1
-            return cv2.imencode('.jpg', data)[1].tostring()
+        self.index += 1
+        if self.index >= len(self.files):
+            return ''
+
+        sleep(0.033)
+        filename = self.files[self.index]
+        self.pktnum += 1
+        with open(self.dirname + '/' + filename, 'rb') as f:
+            return f.read()
 
     def get_pktnum(self):
         return self.pktnum

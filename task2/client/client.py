@@ -27,9 +27,11 @@ class Client:
 
         self.gui.btnplay.clicked.connect(self.logic.play_btn_clicked)
         self.gui.btnplay.clicked.connect(self.guilogic.play_btn_clicked)
+        self.gui.btnforward.clicked.connect(self.logic.fast_forward)
         self.gui.btnfull.clicked.connect(self.guilogic.full_screen)
         self.gui.btnaudio.clicked.connect(self.guilogic.btn_audio_clicked)
         self.gui.btnspeed.currentTextChanged.connect(self.guilogic.speed_changed)
+        self.gui.btnclarity.currentTextChanged.connect(self.logic.set_clarity)
         self.gui.playslider.sliderMoved.connect(self.logic.play_slider_moved)
         self.gui.playslider.sliderMoved.connect(self.guilogic.play_slider_moved)
         self.gui.playslider.sliderReleased.connect(self.logic.play_slider_moved)

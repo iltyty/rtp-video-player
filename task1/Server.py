@@ -90,9 +90,9 @@ class Server:
     def process_setup(self, clientInfo):
         if clientInfo.status == INIT:
             self.print_log('Process method SETUP')
-            filename = clientInfo.lines[0].split()[1]
+            dirname = clientInfo.lines[0].split()[1]
             try:
-                clientInfo.videoframe = VideoFrame(filename)
+                clientInfo.videoframe = VideoFrame(dirname)
                 clientInfo.status = READY
             except FileNotFoundError:
                 # sequence number in line 1, e.g, CSeq 1
@@ -155,11 +155,9 @@ class Server:
             data = clientInfo.videoframe.next_pkt()
             # transmission completed
             if not data:
-                print('finished')
                 return
             seqnum = clientInfo.videoframe.get_pktnum()
             rtppkt = self.pack_rtp_pkt(data, seqnum)
-            print(seqnum)
 
             clientInfo.rtpsock.sendto(rtppkt, (clientInfo.addr[0], clientInfo.rtpport))
 

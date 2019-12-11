@@ -108,6 +108,11 @@ class ClientGUI(QWidget):
         self.lblprogress.setText('{:0>2d}:{:0>2d}:{:0>2d}'.format(hours, mins, secs))
         self.playslider.setValue(self.playslider.value() + 1)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            print('1')
+            self.lblvideo.setParent(self)
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     player = ClientGUI()

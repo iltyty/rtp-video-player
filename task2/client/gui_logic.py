@@ -48,7 +48,11 @@ class GuiLogic(QObject):
     @pyqtSlot()
     def full_screen(self):
         # self.gui.videowidget.setFullScreen(True)
-        pass
+        print('enter')
+        # self.gui.lblvideo.setParent(None)
+        # self.gui.lblvideo.showFullScreen()
+        print(self.gui.lblvideo.parent())
+        self.gui.showFullScreen()
 
     @pyqtSlot()
     def btn_audio_clicked(self):
@@ -126,7 +130,7 @@ class GuiLogic(QObject):
         Updata video frame every 1000 / fps ms
         """
         self.cur_frm = 0
-        while self.cur_frm <= self.frm_cnt:
+        while True:
             if not self.playing:
                 continue
 
@@ -154,8 +158,8 @@ class GuiLogic(QObject):
         Progress thread
         Update process label and play slider every 1/0.5/2 s
         """
-        while self.cur_frm <= self.frm_cnt:
-            if not self.playing:
+        while True:
+            if (not self.playing) or (self.play_time >= self.duration):
                 continue
 
             self.play_time += 1

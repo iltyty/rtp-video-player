@@ -57,6 +57,12 @@ class LogicHandler(QObject):
         self.playevt = threading.Event()
         self.playevt.clear()
 
+        # Video quality
+        # Super: 100
+        # High:  70
+        # Fluent: 40
+        self.quality = 70
+
 
     def connect_to_server(self):
         self.rtspsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -72,6 +78,10 @@ class LogicHandler(QObject):
             self.send_play()
         elif self.status == self.PLAYING:
             self.send_pause()
+        elif self.status == self.INIT:
+            self.send_setup()
+            time.sleep(0.1)
+            self.send_play()
 
     def write_frame(self, data):
         """
@@ -93,27 +103,26 @@ class LogicHandler(QObject):
         req = 'DESCRIBE ' + self.url + ' RTSP/2.0\nCSeq: ' + str(self.rtspseq)
         self.rtspsock.sendall(req.encode())
         self.reqsent = self.DESCRIBE
-        time.sleep(1)
-        self.send_setup()
 
     def send_setup(self):
         if self.status != self.INIT:
             return
 
         self.rtspseq += 1
-        req = 'SETUP ' + self.url + ' RTSP/2.0\nCSeq: ' + str(self.rtspseq) + '\nTransport: RTP/UDP; client_port= ' + str(self.rtpport)
+        req = 'SETUP ' + self.url + ' RTSP/2.0\nCSeq: ' + str(self.rtspseq) + '\nTransport: RTP/UDP; client_port= ' + \
+            str(self.rtpport) + '\nQuality: ' + str(self.quality)
         self.rtspsock.send(req.encode())
         self.reqsent = self.SETUP
         self.status = self.READY
 
     @pyqtSlot()
-    def send_play(self, location=0):
+    def send_play(self, npt=0):
         self.rtspseq += 1
         self.playevt.clear()
         threading.Thread(target=self.listen_rtp).start()
 
-        req = 'PLAY ' + self.url + ' RTSP/2.0\nCSeq: ' + str(self.rtspseq) + \
-            '\nSession: ' + str(self.sessionid) + '\nLocation: ' + str(location)
+        req = 'PLAY ' + self.url + ' RTSP/2.0\nCSeq: ' + str(self.rtspseq) \
+            + '\nSession: ' + str(self.sessionid) + '\nNPT: ' + str(npt)
         self.rtspsock.send(req.encode())
         self.reqsent = self.PLAY
         self.status = self.PLAYING
@@ -240,14 +249,38 @@ class LogicHandler(QObject):
         self.playevt.set()
 
         slider = self.sender()
-        portion = slider.value() / self.duration
-        frmnum = portion * self.frm_cnt
-        self.send_play(int(frmnum))
+        self.send_play(1000 * slider.value())
 
     def clear_cache(self):
         """
         Clear the cache directory
         """
-        shutil.rmtree('cache')
-        os.mkdir('./cache')
+        for path, dir_, files in os.walk('./cache'):
+            for f in files:
+                os.remove('./cache/' + f)
         self.index = 0
+
+    @pyqtSlot()
+    def fast_forward(self):
+        slider = self.sender()
+        slider.setValue(slider.value() + 5)
+
+    @pyqtSlot()
+    def set_clarity(self):
+        self.clear_cache()
+        self.playevt.set()
+
+        combo_box = self.sender()
+        index = combo_box.currentIndex()
+
+        if index == 0:
+            # High quality
+            self.quality = 70
+        elif index == 1:
+            # Super quality
+            self.quality = 100
+        else:
+            # Fluent quality
+            self.quality = 40
+
+        self.send_setup()

@@ -64,10 +64,12 @@ class Handler:
                 'CSeq': request.seqnum,
                 'Session': self.sessionid
             }
+            self.signal.set()
+            time.sleep(1)
 
-            location = int(request.header['Location'])
-            if location:
-                self.videostream.vidcap.set(cv2.CAP_PROP_POS_FRAMES, location)
+            npt = int(request.header['NPT'])
+            if npt:
+                self.videostream.vidcap.set(cv2.CAP_PROP_POS_MSEC, npt)
 
             self.state = self.PLAYING
             self.signal.clear()
@@ -100,6 +102,8 @@ class Handler:
                 'Session': self.sessionid
             }
 
+            quality = int(request.header['Quality'])
+            self.videostream.quality = quality
             self.state = self.READY
             self.rtpport = int(request.lines[2].split()[3])
             return Response(200, header)
